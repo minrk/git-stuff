@@ -1,0 +1,57 @@
+#!/usr/bin/env ruby
+# 
+# git fuzzy-checkout
+
+# Same as `git checkout branch`, but with fuzzy matching if checkout fails.
+# Turns `git checkout barnch` into `git checkout branch`,
+# assuming `branch` is a branch.
+# to use, you can alias:
+# alias co="git fuzzy-checkout"
+# co msater
+
+
+require "set"
+require "rubygems"
+require "amatch"
+
+def git_branches
+    # construct array of git branches
+    branches = `git branch -r`.split
+    remotes = Set.new `git remote`.split
+    branches.delete "*"
+    extras = []
+    # add remote branches minus the 'remote/' prefix
+    branches.each do |branch|
+      remote, branch = branch.split("/", 2)
+      if remotes.include? remote
+        extras.push branch
+      end
+    end
+    branches + extras
+end
+
+def fuzzy_checkout(branch)
+    # wrapper for git-checkout that does fuzzy-matching
+    #
+    # Helps with typos, etc. by automatically checking out the closest match
+    # if the initial checkout call fails.
+    
+    # if checkout succeeds, nothing to do
+    success = system "git checkout #{branch}"
+    if success
+      return success
+    end
+    
+    branches = git_branches.sort { |a,b|
+      branch.levenshtein_similar(a) <=> branch.levenshtein_similar(b)
+    }
+    best = branches.last
+    similarity = branch.levenshtein_similar(best)
+    if similarity > 0.5
+      puts "Best match for #{branch}: #{best} (#{(100 * similarity).round(1)}%)"
+      success = system "git checkout #{best}"
+    end
+    success
+end
+
+exit fuzzy_checkout(ARGV[0])

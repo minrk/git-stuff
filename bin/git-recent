@@ -1,0 +1,18 @@
+#!/bin/bash
+# git-recent: prints the recent heads from a remote
+#
+# Usage:
+# 
+# git recent              # recent branches in this repo
+# git recent remote_name  # recent branches in remote_name
+#
+# git-recent was written by Paul Ivanov. Please send improvements to @ivanov on
+# GitHub/Twitter, or find my email address.
+#
+RED="\033[0;31m"
+NO_COLOR="\033[0m"
+if [ "$#" = "0" ]; then
+    echo -e \ `git for-each-ref --sort=-committerdate refs/heads --format="%(committerdate:short) %(authorname)  $RED %(refname:short) $NO_COLOR \n"` | head
+else
+    echo -e \ `git for-each-ref --sort=-committerdate refs/remotes/$1 --format="%(committerdate:short) %(authorname)  $RED %(refname:short) $NO_COLOR \n"` | head
+fi

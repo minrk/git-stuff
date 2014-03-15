@@ -1,0 +1,5 @@
+#!/bin/sh
+# safely rollback a commit, leaving any changes uncommitted
+# use with git-cp
+
+git log -1 && git reset HEAD^1 $@

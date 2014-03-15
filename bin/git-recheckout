@@ -1,0 +1,17 @@
+#!/bin/bash
+# git-recheckout: git reset to the upstream branch
+#
+# Your local checkout of a branch, and the remote branch it tracks are out of
+# sync. You want to check it out again, discarding your version of the branch.
+#
+# Because you need to know the remotename/branchname string to reset to
+#
+# 1. get the remotename/the-branch combination
+# 2. git reset -b the-branch remotename/the-branch
+#
+# NOTE: If you ever do this accidentally, you can still get your work back by
+# finding the appropriate commits via git-reflog.
+# 
+
+remote_branch=`git status -b -uno --porcelain | head -1 | cut -f2 -d\  |cut -f4 -d.`
+git reset $@ "$remote_branch"

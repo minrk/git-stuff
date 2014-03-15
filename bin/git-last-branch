@@ -1,0 +1,18 @@
+#!/usr/bin/env ruby
+# like `git checkout -`, but ignore master because it's never what I want
+# I use this as `alias c-=git-last-branch`
+
+skip = [`git rev-parse --abbrev-ref HEAD`.strip, "master"]
+
+(1..100).each do |n|
+  b = `git rev-parse --abbrev-ref @{-#{n}}`.strip
+  if b.empty? or skip.include? b
+    next
+  else
+    system "git", "checkout", b
+    exit
+  end
+end
+
+puts "Never found a branch to checkout (?!)"
+exit 1

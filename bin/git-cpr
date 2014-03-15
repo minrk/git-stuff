@@ -1,0 +1,20 @@
+#!/usr/bin/env ruby
+# fetch and checkout a pull request from GitHub
+# Usage: git cpr 1234
+# Check out the merge ref, rather than head with: git cpr 1234/merge
+
+pr = ARGV[0]
+if not pr.end_with?("/head", "/merge")
+  pr =  pr + "/head"
+end
+
+cmd = "git fetch origin pull/#{pr}"
+puts cmd
+if ! (system cmd)
+  exit -1
+end
+cmd = "git checkout FETCH_HEAD" + ARGV.slice(1).join(" ")
+puts cmd
+# swallow 'detached head' message
+out=`#{checkout}`
+puts "Checked out #{pr}"
