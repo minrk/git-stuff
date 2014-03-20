@@ -13,8 +13,8 @@ puts cmd
 if ! (system cmd)
   exit -1
 end
-cmd = "git checkout FETCH_HEAD" + ARGV.slice(1).join(" ")
+cmd = "git checkout FETCH_HEAD" + ARGV.slice(1, ARGV.length).join(" ")
 puts cmd
 # swallow 'detached head' message
-out=`#{checkout}`
+out=`#{cmd}`
 puts "Checked out #{pr}"
