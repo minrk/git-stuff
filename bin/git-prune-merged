@@ -1,0 +1,33 @@
+#!/bin/sh
+# prune merged branches
+# if an arg is given, prune merged branches from a remote, rather than local branches
+
+set -e
+remote="$1"
+if [[ -z "$remote" ]]; then
+  from='local'
+  before=`git branch | wc -l | tr -d ' '`
+  branches=`git branch --merged | grep -v '*'`
+  # don't trim master or develop
+  branches=`echo $branches | grep -v '\sdevelop$' | grep -v '\smaster$'`
+  git branch -d $branches
+  after=`git branch | wc -l | tr -d ' '`
+else
+  from="remote ($remote)"
+  before=`git branch -r | grep "^\s\+$remote/" | wc -l | tr -d ' '`
+  branches=`git branch -r --merged | grep "^\s\+$remote/" | cut -d/ -f2-`
+  # don't trim master or develop
+  pushes=""
+  for b in $branches; do
+    if [[ "$b" == "develop" || "$b" == "master" ]]; then
+      continue
+    else
+      pushes="$pushes :$b"
+    fi
+  done
+  git push $remote $pushes
+  after=`git branch -r | grep "^\s\+$remote/" | wc -l | tr -d ' '`
+fi
+
+deleted=`expr $before - $after`
+echo "Deleted $deleted $from branches merged into master, $after remaining."
