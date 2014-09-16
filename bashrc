@@ -31,6 +31,7 @@ alias co="git fuzzy-checkout"
 alias c-="git-last-branch"
 alias pr="git push mine && hub pull-request"
 alias uncommit="git log -1 && git reset HEAD^1"
+alias rebase='git rebase -i master'
 
 # completion for aliases
 if [ ! -z "$(declare -f __git_complete)" ]; then
@@ -55,23 +56,25 @@ function _git_branch_paren {
   git branch --no-color 2> /dev/null | sed -e '/^[^*]/d' -e 's/* \(.*\)/(\1) /'
 }
 function proml {
+  local           X="\[$(tput sgr0)\]" # reset
   local        BLUE="\[\033[0;34m\]"
+  local       LBLUE="\[\033[1;34m\]"
   local         RED="\[\033[0;31m\]"
-  local   LIGHT_RED="\[\033[1;31m\]"
+  local        LRED="\[\033[1;31m\]"
   local       GREEN='\[\033[0;32m\]'
-  local LIGHT_GREEN="\[\033[1;32m\]"
+  local      LGREEN="\[\033[1;32m\]"
+  local        GRAY="\[\033[0;37m\]"
   local       WHITE="\[\033[1;37m\]"
-  local  LIGHT_GRAY="\[\033[0;37m\]"
   case $TERM in
     xterm*)
-    TITLEBAR='\[\033]0;\u@\h:\w\007\]'
+    TITLEBAR='\u@\h:\w'
     ;;
     *)
     TITLEBAR=""
     ;;
   esac
 
-  PS1='\[$(tput sgr0)\]${debian_chroot:+($debian_chroot)}\u@\h\[$(tput setaf 1)\][\A]\[$(tput sgr0)\]\w \[\033[0;32m\]$(_git_branch_paren)\[$(tput sgr0)\]$ '
-  test -z "$SSH_CONNECTION" || PS1='\[$(tput sgr0)\]${debian_chroot:+($debian_chroot)}\[$(tput setaf 1)\]\u@\h\[$(tput sgr0)\][\A]\[$(tput sgr0)\]\w \[\033[0;32m\]$(_git_branch_paren)\[$(tput sgr0)\]$ '
+  PS1="$X\u$RED[\A]$X\w $GREEN\$(_git_branch_paren)$X\$ "
+  test -z "$SSH_CONNECTION" || PS1="$X$LRED\u@\h$X[\A]$X\w $GREEN\$(_git_branch_paren)$X\$ "
 }
 proml
