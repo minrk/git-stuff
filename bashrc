@@ -56,7 +56,7 @@ function _git_branch_paren {
   git branch --no-color 2> /dev/null | sed -e '/^[^*]/d' -e 's/* \(.*\)/(\1) /'
 }
 function proml {
-  local           X="\[$(tput sgr0)\]" # reset
+  local           X="\[$(tput sgr0 2>/dev/null)\]" # reset
   local        BLUE="\[\033[0;34m\]"
   local       LBLUE="\[\033[1;34m\]"
   local         RED="\[\033[0;31m\]"
