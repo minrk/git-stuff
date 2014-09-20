@@ -11,8 +11,6 @@
 
 
 require "set"
-require "rubygems"
-require "amatch"
 
 def git_branches
     # construct array of git branches
@@ -40,6 +38,14 @@ def fuzzy_checkout(branch)
     success = system "git checkout #{branch}"
     if success
       return success
+    end
+    
+    begin
+      require "rubygems"
+      require "amatch"
+    rescue LoadError
+      puts "error: git fuzzy-checkout requires gem: amatch"
+      return 1
     end
     
     branches = git_branches.sort { |a,b|
