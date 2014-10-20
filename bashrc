@@ -31,7 +31,8 @@ alias co="git fuzzy-checkout"
 alias c-="git-last-branch"
 alias pr="git push mine && hub pull-request"
 alias uncommit="git log -1 && git reset HEAD^1"
-alias rebase='git rebase -i master'
+alias rebase='git rebase -i origin/master'
+alias fork='hub fork && hub remote add -p mine $(hub config --get github.user)'
 
 # completion for aliases
 if [ ! -z "$(declare -f __git_complete)" ]; then
