@@ -3,16 +3,33 @@
 #
 # Usage:
 # 
-# git recent              # recent branches in this repo
-# git recent remote_name  # recent branches in remote_name
+# git recent [-n limit]              # (n) recent branches in this repo
+# git recent [-n limit] remote_name  # (n) recent branches in remote_name
 #
 # git-recent was written by Paul Ivanov. Please send improvements to @ivanov on
 # GitHub/Twitter, or find my email address.
 #
+
 RED="\033[0;31m"
 NO_COLOR="\033[0m"
-if [ "$#" = "0" ]; then
-    echo -e \ `git for-each-ref --sort=-committerdate refs/heads --format="%(committerdate:short) %(authorname)  $RED %(refname:short) $NO_COLOR \n"` | head
+
+while getopts ":n:" opt; do
+  case $opt in
+    n)
+      HEAD_ARGS="-n $OPTARG"
+      ;;
+    \?)
+      echo "Invalid option: -$OPTARG" >&2
+      exit -1
+      ;;
+  esac
+done
+
+REMOTE="${@:$OPTIND:1}"
+if [ -z "$REMOTE" ]; then
+  REFS="refs/heads"
 else
-    echo -e \ `git for-each-ref --sort=-committerdate refs/remotes/$1 --format="%(committerdate:short) %(authorname)  $RED %(refname:short) $NO_COLOR \n"` | head
+  REFS="refs/remotes/$REMOTE"
 fi
+
+echo -e \ `git for-each-ref --sort=-committerdate $REFS --format="%(committerdate:short) %(authorname)  $RED %(refname:short) $NO_COLOR \n"` | head $HEAD_ARGS
