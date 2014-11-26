@@ -18,13 +18,18 @@ else
   branches=`git branch -r --merged | grep "^\s\+$remote/" | cut -d/ -f2-`
   # don't trim master or develop
   pushes=""
+  rms=""
   for b in $branches; do
     if [[ "$b" == "develop" || "$b" == "master" ]]; then
       continue
     else
+      rms="$rms $remote/$b"
       pushes="$pushes :$b"
     fi
   done
+  # delete local copies
+  git branch -d -r $rms
+  # push delete
   git push $remote $pushes
   after=`git branch -r | grep "^\s\+$remote/" | wc -l | tr -d ' '`
 fi
