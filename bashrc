@@ -9,6 +9,7 @@ alias whichs='which >/dev/null 2>&1'
 whichs hub && alias git=hub
 
 # git-related aliases
+alias clone='git clone --recursive'
 alias gdiff='git diff --color-words'
 alias status='git status -uno'
 alias commit='git commit'
@@ -36,6 +37,7 @@ alias fork='hub fork && hub remote add -p mine $(hub config --get github.user)'
 
 # completion for aliases
 if [ ! -z "$(declare -f __git_complete)" ]; then
+    __git_complete clone _git_clone
     __git_complete gdiff _git_diff
     __git_complete commit _git_commit
     __git_complete ci _git_commit
@@ -49,6 +51,7 @@ if [ ! -z "$(declare -f __git_complete)" ]; then
     __git_complete remote _git_remote
     __git_complete pick _git_cherry_pick
     __git_complete cherry _git_cherry_pick
+    __git_complete rebase _git_rebase
 fi
 
 # add the git branch to the prompt
