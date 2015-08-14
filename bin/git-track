@@ -1,0 +1,23 @@
+#!/bin/sh
+thisbranch=`git branch | grep '^*' | awk '{print $2}'`
+
+if [[ ! -z "$1" ]]; then
+    upstream="$1"
+    if [[ "$upstream" != *"/"* ]]; then
+        upstream="origin/$upstream"
+    fi
+    shift
+else
+    branch="$thisbranch"
+    upstream="origin/$branch"
+fi
+
+if [[ ! -z "$1" ]]; then
+    branch="$1"
+else
+    branch="$thisbranch"
+fi
+
+
+cmd=`echo git branch --set-upstream-to="$upstream" "$branch"`
+echo $cmd
