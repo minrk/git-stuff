@@ -4,6 +4,9 @@
 
 set -e
 remote="$1"
+# prune deleted remote branches
+git remote prune $(git remote)
+
 if [[ -z "$remote" ]]; then
   from='local'
   before=`git branch | wc -l | tr -d ' '`
@@ -27,10 +30,16 @@ else
       pushes="$pushes :$b"
     fi
   done
+  echo $rms $pushes
+  
   # delete local copies
-  git branch -d -r $rms
+  if [[ ! -z "$rms" ]]; then
+    git branch -d -r $rms
+  fi
   # push delete
-  git push $remote $pushes
+  if [[ ! -z "$pushes" ]]; then
+    git push $remote $pushes
+  fi
   after=`git branch -r | grep "^\s\+$remote/" | wc -l | tr -d ' '`
 fi
 
