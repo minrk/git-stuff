@@ -8,7 +8,7 @@ if not pr.end_with?("/head", "/merge")
   pr =  pr + "/head"
 end
 
-cmd = "git fetch origin pull/#{pr}"
+cmd = "git fetch origin refs/pull/#{pr}"
 puts cmd
 if ! (system cmd)
   exit -1
