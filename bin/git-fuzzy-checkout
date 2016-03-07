@@ -14,12 +14,13 @@ require "set"
 
 def git_branches
     # construct array of git branches
-    branches = `git branch -r`.split
+    branches = `git branch`.split
+    remote_branches = `git branch -r`.split
     remotes = Set.new `git remote`.split
     branches.delete "*"
     extras = []
     # add remote branches minus the 'remote/' prefix
-    branches.each do |branch|
+    remote_branches.each do |branch|
       remote, branch = branch.split("/", 2)
       if remotes.include? remote
         extras.push branch
