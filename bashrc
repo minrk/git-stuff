@@ -34,6 +34,7 @@ alias pr="git push mine && hub pull-request"
 alias uncommit="git log -1 && git reset HEAD^1"
 alias rebase='git rebase -i origin/master'
 alias fork='hub fork && hub remote add -p mine $(hub config --get github.user)'
+alias pm='git push mine'
 
 # completion for aliases
 if [ ! -z "$(declare -f __git_complete)" ]; then
@@ -52,6 +53,8 @@ if [ ! -z "$(declare -f __git_complete)" ]; then
     __git_complete pick _git_cherry_pick
     __git_complete cherry _git_cherry_pick
     __git_complete rebase _git_rebase
+    __git_complete fork _git_fork
+    __git_complete pm _git_push
 fi
 
 # add the git branch to the prompt
