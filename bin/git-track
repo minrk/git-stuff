@@ -1,5 +1,8 @@
 #!/bin/sh
 thisbranch=`git branch | grep '^*' | awk '{print $2}'`
+if [[ -z "$thisbranch" ]]; then
+    thisbranch=master
+fi
 
 if [[ ! -z "$1" ]]; then
     upstream="$1"
@@ -21,3 +24,4 @@ fi
 
 cmd=`echo git branch --set-upstream-to="$upstream" "$branch"`
 echo $cmd
+$cmd
