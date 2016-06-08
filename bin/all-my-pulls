@@ -1,0 +1,104 @@
+#!/usr/bin/env ruby
+# Show me all pull requests that I can merge
+# if org or repo names are given on the CLI, only those orgs/repos will be included
+# e.g.
+# 
+#     all-my-pulls conda-forge ipython jupyter
+
+
+require "rubygems"
+require "netrc"
+require "highline/import"
+require "octokit"
+
+
+def check_token
+  # get GitHub auth token, creating one if we don't find it.
+  rc = Netrc.read Netrc.default_path
+  if not rc['api.github.com'].nil?
+    return
+  end
+  puts "We need your password to generate an OAuth token. The password will not be stored."
+  username = ask "Username: "
+  password = ask("Password:  ") { |q| q.echo = '*' }
+  client = Octokit::Client.new(
+    :login => username,
+    :password => password,
+  )
+  reply = client.create_authorization(
+    :scopes => ["public_repo"],
+    :note => "GitHub API (netrc)",
+  )
+  token = reply.token
+  rc['api.github.com'] = username, token
+  rc.save
+end
+
+
+def main(filters)
+  # verify that there's a GitHub token in .netrc
+  check_token
+
+  # create client
+  github = Octokit::Client.new(:netrc => true)
+  github.auto_paginate = true
+  github.default_media_type = 'application/vnd.github.golden-comet-preview+json'
+
+  repo_filters = filters.select { |f| f.include? '/' }
+  org_filters = filters.select { |f| not f.include? '/' }
+
+  if not org_filters.empty?
+    puts "Showing PRs for orgs: #{org_filters.join(',')}"
+  end
+  if not repo_filters.empty?
+    puts "Showing PRs for repos: #{repo_filters.join(',')}"
+  end
+  if filters.empty?
+    puts "Showing all PRs mergeable by #{github.user.login}"
+  end
+  repos = github.paginate('user/repos', :sort => 'updated')
+  pull_count = 0
+  repo_count = 0
+  org_count = 0
+  # iterate through repos
+  repos.each do |repo|
+    # check filters
+    org = repo.full_name.split('/')[0]
+    if not filters.empty?
+      if not (repo_filters.include? repo.full_name or org_filters.include? org)
+        next
+      end
+    end
+    repo_count += 1
+    # iterate through pulls, add to all_pulls array
+    pulls = github.pulls(repo.full_name, :sort => 'updated')
+    if pulls.empty?
+      next
+    end
+    pull_count += pulls.length
+    
+    # show repo name, number of open PRs
+    puts "\n#{repo.full_name} (#{pulls.length} PR#{'s' if pulls.length > 1})"
+    
+    # for each PR, show
+    # #NN Title [milestone]
+    #   URL
+    #   Updated: date
+    pulls.each do |pull|
+      ms = ''
+      if pull.milestone
+        puts pull.milestone
+        ms = "[#{pull.milestone.label}]"
+      end
+      puts "\n  ##{pull.number} @#{pull.user.login}: #{pull.title} #{ms}"
+      puts "    #{pull.html_url}"
+      puts "    Updated: #{pull.updated_at}"
+      puts "    Opened: #{pull.created_at}"
+    end
+  end
+  puts "\n#{pull_count} PRs open across #{repo_count} repositories"
+end
+
+if __FILE__ == $0
+  main(ARGV)
+end
