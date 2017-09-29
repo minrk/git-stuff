@@ -89,3 +89,5 @@ function proml {
   test -z "$SSH_CONNECTION" || PS1="$X$LRED\u@\h$X[\A]$X\w $GREEN\$(_git_branch_paren)$X\$ "
 }
 proml
+
+source $(dirname "$0")/kubernetes.bashrc
