@@ -90,4 +90,4 @@ function proml {
 }
 proml
 
-source $(dirname "$0")/kubernetes.bashrc
+source "${BASH_SOURCE%/*}/kubernetes.bashrc"

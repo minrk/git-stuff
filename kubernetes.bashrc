@@ -5,6 +5,6 @@ function kns() {
   if [[ -z "$1" ]]; then
     unalias kubectl
   else
-    alias kubectl="kubernetes --namespace $1"
+    alias kubectl="kubectl --namespace $1"
   fi
 }
