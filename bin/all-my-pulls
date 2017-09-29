@@ -62,6 +62,11 @@ def main(filters)
   org_count = 0
   # iterate through repos
   repos.each do |repo|
+    # check permissions, since some things seem to slip through (e.g. org team members)
+    if not repo.permissions.push
+      puts "No push on #{repo.full_name}"
+      next
+    end
     # check filters
     org = repo.full_name.split('/')[0]
     if not filters.empty?
@@ -70,7 +75,12 @@ def main(filters)
       end
     end
     repo_count += 1
-    # iterate through pulls, add to all_pulls array
+    
+    if repo.open_issues_count == 0
+      # no issues, don't bother checking for pulls
+      next
+    end
+
     pulls = github.pulls(repo.full_name, :sort => 'updated')
     if pulls.empty?
       next
@@ -87,8 +97,7 @@ def main(filters)
     pulls.each do |pull|
       ms = ''
       if pull.milestone
-        puts pull.milestone
-        ms = "[#{pull.milestone.label}]"
+        ms = "[#{pull.milestone.title}]"
       end
       puts "\n  ##{pull.number} @#{pull.user.login}: #{pull.title} #{ms}"
       puts "    #{pull.html_url}"
