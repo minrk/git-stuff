@@ -16,6 +16,7 @@ alias commit='git commit'
 alias checkout='git fuzzy-checkout'
 alias branch='git checkout -b'
 alias amend='git commit --amend'
+alias aamend='git commit -a --amend --no-edit'
 alias push='git push'
 alias pull='git pull'
 alias fetch='git fetch'
@@ -35,12 +36,15 @@ alias uncommit="git log -1 && git reset HEAD^1"
 alias rebase='git rebase -i origin/master'
 alias fork='hub fork && hub remote add -p mine $(hub config --get github.user)'
 alias pm='git push mine'
+alias gitx='open -a Fork .'
 
 # completion for aliases
 if [ ! -z "$(declare -f __git_complete)" ]; then
     __git_complete clone _git_clone
     __git_complete gdiff _git_diff
     __git_complete commit _git_commit
+    __git_complete amend _git_commit
+    __git_complete aamend _git_commit
     __git_complete ci _git_commit
     __git_complete fetch _git_fetch
     __git_complete branch _git_branch
