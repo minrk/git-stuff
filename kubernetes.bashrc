@@ -30,12 +30,16 @@ function kns() {
 }
 
 function pod() {
-  # evaluate alias explicitly. function seems to use alias at definition time
-  if alias kubectl &>/dev/null; then
-    kc="$(alias kubectl | awk -F "'" '{print $2}')"
-  else
-    kc=kubectl
-  fi
   # get the first pod matching a prefix
-  $kc get pod | grep "^${1}" | head -n 1 | awk '{print $1}'
+  # useful with, e.g.
+  # kubectl logs -f `pod hub`
+
+  pod=$(kubectl get pod | grep "^${1}" | head -n 1 | awk '{print $1}')
+  if [[ -z "$pod" ]]; then
+    # output something to avoid `pod nomatch` returning an empty string
+    # which can result in performing the operation on all pods (e.g. describe `pod nomatch`)
+    echo "nosuchpod-${1}"
+  else
+    echo "$pod"
+  fi
 }
