@@ -4,15 +4,16 @@
 
 set -e
 remote="$1"
+set -u
 # prune deleted remote branches
-git remote prune $(git remote)
+git remote prune $(git remote) || echo 'error'
 
 if [[ -z "$remote" ]]; then
   from='local'
   before=`git branch | wc -l | tr -d ' '`
   branches=`git branch --merged | grep -v '*'`
   # don't trim master or develop
-  branches=`echo $branches | grep -v '\sdevelop$' | grep -v '\smaster$'`
+  branches=`echo $branches | grep -v '\sdevelop$' | grep -v '\smaster$' | grep -v '\sgh-pages$'`
   git branch -d $branches
   after=`git branch | wc -l | tr -d ' '`
 else
@@ -31,7 +32,7 @@ else
     fi
   done
   echo $rms $pushes
-  
+
   # delete local copies
   if [[ ! -z "$rms" ]]; then
     git branch -d -r $rms
