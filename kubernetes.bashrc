@@ -1,12 +1,32 @@
 # kubernetes stuff because I don't want to make another repo
 
-function kns() {
-  # set the default namespace for kubectl
-  if [[ -z "$1" ]]; then
-    unalias kubectl
-  else
-    alias kubectl="kubectl --namespace $1"
+# lighter weight version of kubectx/kubens that uses environment variables
+# env variables allow different shells to be in different contexts,
+# unlike kubectx which touches config files
+
+function kubectl() {
+  cmd="$(which kubectl)"
+  if [[ "$1" != "config" ]]; then
+    # add KUBECTX context if defined
+    if [[ ! -z "${KUBECTX}" && "$@" != *"--context"* ]]; then
+      cmd="$cmd --context=${KUBECTX}"
+    fi
+    # add KUBENS context if defined
+    if [[ ! -z "${KUBENS}" && "$@" != *"--namespace"* ]]; then
+      cmd="$cmd --namespace=${KUBENS}"
+    fi
   fi
+  $cmd "$@"
+}
+
+function kctx() {
+  # set default context
+  export KUBECTX="$1"
+}
+
+function kns() {
+  # set default namespace
+  export KUBENS="$1"
 }
 
 function pod() {
