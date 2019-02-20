@@ -4,6 +4,8 @@
 # env variables allow different shells to be in different contexts,
 # unlike kubectx which touches config files
 
+alias kube-drain="kubectl drain --force --delete-local-data --ignore-daemonsets --grace-period=0 "
+
 function kubectl() {
   cmd="$(which kubectl)"
   if [[ "$1" != "config" ]]; then
@@ -16,6 +18,7 @@ function kubectl() {
       cmd="$cmd --namespace=${KUBENS}"
     fi
   fi
+  # echo $cmd "$@"
   $cmd "$@"
 }
 
@@ -28,6 +31,8 @@ function kns() {
   # set default namespace
   export KUBENS="$1"
 }
+
+alias kube-addresses="kubectl get node -o json | jq '.items[] | [.status.addresses[].address,.spec.providerID]'"
 
 function pod() {
   # get the first pod matching a prefix
