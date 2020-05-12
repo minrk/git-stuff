@@ -1,0 +1,34 @@
+# BSD `which -s` that works on Linux
+alias whichs='which >/dev/null 2>&1'
+# use hub git wrapper if available:
+whichs hub && alias git=hub
+
+# git-related aliases
+alias clone='git clone --recursive'
+alias gdiff='git diff --color-words'
+alias status='git status -uno'
+alias commit='git commit'
+alias checkout='git fuzzy-checkout'
+alias branch='git checkout -b'
+alias amend='git commit --amend'
+alias aamend='git commit -a --amend --no-edit'
+alias push='git push'
+alias pull='git pull'
+alias fetch='git fetch'
+alias remote='git remote add'
+alias cherry='git cherry-pick'
+alias pick='git cherry-pick'
+alias submodule='git submodule init && git submodule update'
+alias m="git checkout master"
+alias mp="git checkout master && git pull"
+alias b="git checkout -b"
+alias ci='git commit'
+alias c="git fuzzy-checkout"
+alias co="git fuzzy-checkout"
+alias c-="git-last-branch"
+alias pr="git push mine && hub pull-request"
+alias uncommit="git log -1 && git reset HEAD^1"
+alias rebase='git rebase -i origin/master'
+alias fork='hub fork && hub remote add -p mine $(hub config --get github.user)'
+alias pm='git push mine'
+alias gitx='open -a Fork .'
