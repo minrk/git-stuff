@@ -39,7 +39,19 @@ function pod() {
   # useful with, e.g.
   # kubectl logs -f `pod hub`
 
-  pod=$(kubectl get pod | grep "^${1}" | head -n 1 | awk '{print $1}')
+  # prioritize prefix
+  pod=
+  for match in $(kubectl get pod --no-headers | awk '{print $1}' | grep "${1}"); do
+    if [[ -z "$pod" ]]; then
+      pod=$match
+    fi
+    prefix_pod=$(echo $match | grep "^${1}")
+    if [[ ! -z "$prefix_pod" ]]; then
+      pod="$prefix_pod"
+      break
+    fi
+  done
+
   if [[ -z "$pod" ]]; then
     # output something to avoid `pod nomatch` returning an empty string
     # which can result in performing the operation on all pods (e.g. describe `pod nomatch`)
@@ -47,4 +59,22 @@ function pod() {
   else
     echo "$pod"
   fi
+}
+
+
+function kube-delete-pods() {
+  pat="$1"
+  shift
+  pods=$(kubectl get pod --no-headers "$@" | awk '{print $1}' | grep "$pat")
+  echo "$pods"
+  read -p "Delete above pods (y/[n])?" yesno
+  case "$yesno" in
+    y|Y )
+      echo kubectl delete pod "$@" $pods;
+      kubectl delete pod "$@" $pods;
+      ;;
+    * )
+      echo "Cancelled"
+      ;;
+  esac
 }
