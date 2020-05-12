@@ -1,0 +1,4 @@
+#!/bin/sh
+# alias for git reset --hard origin/master
+ref=${1:-origin/master}
+git reset --hard $ref
