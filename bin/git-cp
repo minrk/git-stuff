@@ -1,4 +1,4 @@
 #!/bin/sh
 # quickly create a commit that you don't intend to keep
 # use with git-uncommit
-git commit -a -m "checkpoint"
+git commit -a -m "checkpoint" --no-verify
