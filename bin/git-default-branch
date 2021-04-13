@@ -1,0 +1,23 @@
+#!/bin/sh
+set -euo pipefail
+
+# this takes a while with git remote show origin, so cache result
+
+if [ "${1:-}" == "-f" ]; then
+  git config --unset-all defaultbranch.branch
+else
+  branch="$(git config --get defaultbranch.branch || true)"
+fi
+
+if [ ! -z "${branch:-}" ]; then
+  echo $branch
+  exit 0
+fi
+
+# print $NF prints the last item
+# line looks like:
+#   HEAD branch: main
+branch=$(git remote show origin | grep 'HEAD branch' | awk '{print $NF}')
+
+git config --add defaultbranch.branch "$branch"
+echo $branch
