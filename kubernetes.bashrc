@@ -78,3 +78,5 @@ function kube-delete-pods() {
       ;;
   esac
 }
+
+alias kube-watch-not-running="watch 'kubectl get pod | grep -v Running'"
