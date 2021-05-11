@@ -1,8 +1,13 @@
 #!/bin/sh
 set -euo pipefail
 
-# this takes a while with git remote show origin, so cache result
+# usage: wherever you would have typed 'master' or 'main',
+# use `$(git default-branch)` instead, e.g.
+# git rebase -i origin/$(git default-branch)
 
+# I use it in aliases, e.g. `alias mp='git checkout $(git default-branch) && git pull`
+
+# `git remote show origin` takes a while, so cache result
 if [ "${1:-}" == "-f" ]; then
   git config --unset-all defaultbranch.branch
 else
