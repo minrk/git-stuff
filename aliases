@@ -26,9 +26,18 @@ alias ci='git commit'
 alias c="git fuzzy-checkout"
 alias co="git fuzzy-checkout"
 alias c-="git-last-branch"
-alias pr="git push mine && hub pull-request"
 alias uncommit="git log -1 && git reset HEAD^1"
 alias rebase='git rebase -i origin/$(git default-branch)'
-alias fork='hub fork && hub remote add -p mine $(hub config --get github.user)'
+alias rbc='git rebase --continue'
+alias fork='gh repo fork --remote --remote-name mine'
 alias pm='git push mine'
 alias gitx='open -a Fork .'
+alias git-cpr='gh pr checkout'
+
+function pr () {
+  if [[ -z $(git remote | grep mine) ]]; then
+    fork
+  fi
+  git push -u mine
+  gh pr create --web "$@"
+}
