@@ -4,7 +4,7 @@
 # env variables allow different shells to be in different contexts,
 # unlike kubectx which touches config files
 
-alias kube-drain="kubectl drain --force --delete-local-data --ignore-daemonsets --grace-period=0 "
+alias kube-drain="kubectl drain --force --delete-emptydir-data --ignore-daemonsets --grace-period=0 "
 
 function kubectl() {
   cmd="$(which kubectl)"
@@ -80,3 +80,24 @@ function kube-delete-pods() {
 }
 
 alias kube-watch-not-running="watch 'kubectl get pod | grep -v Running'"
+
+function kx() {
+  # run in a pod with kubectl exec -it
+  pod="$1"
+  shift
+  kubectl exec -it "$pod" -- sh -c "COLUMNS=$COLUMNS $@"
+}
+
+function kxps() {
+  # run ps aux in a pod
+  kx "$1" "$@"
+}
+
+function kxnbshow() {
+  # show a notebook
+  pod="$1"
+  shift
+  nb="$1"
+  shift
+  kx "$pod" cat "$nb" | nbshow -s "$@" -
+}
