@@ -24,7 +24,6 @@ if [ ! -z "$(declare -f __git_complete)" ]; then
     __git_complete pick _git_cherry_pick
     __git_complete cherry _git_cherry_pick
     __git_complete rebase _git_rebase
-    __git_complete fork _git_fork
     __git_complete pm _git_push
 fi
 
