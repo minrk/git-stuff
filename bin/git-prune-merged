@@ -7,13 +7,14 @@ remote="$1"
 set -u
 # prune deleted remote branches
 git remote prune $(git remote) || echo 'error'
+default=$(git default-branch)
 
 if [[ -z "$remote" ]]; then
   from='local'
   before=`git branch | wc -l | tr -d ' '`
   branches=`git branch --merged | grep -v '*'`
-  # don't trim master or develop
-  branches=`echo $branches | grep -v '\sdevelop$' | grep -v '\smaster$' | grep -v '\sgh-pages$'`
+  # don't trim default branch or develop
+  branches=`echo $branches | grep -v '\sdevelop$' | grep -v '\s${default}$' | grep -v '\sgh-pages$'`
   git branch -d $branches
   after=`git branch | wc -l | tr -d ' '`
 else
@@ -24,7 +25,7 @@ else
   pushes=""
   rms=""
   for b in $branches; do
-    if [[ "$b" == "develop" || "$b" == "master" ]]; then
+    if [[ "$b" == "${default}" ]]; then
       continue
     else
       rms="$rms $remote/$b"
@@ -45,4 +46,4 @@ else
 fi
 
 deleted=`expr $before - $after`
-echo "Deleted $deleted $from branches merged into master, $after remaining."
+echo "Deleted $deleted $from branches merged into $default, $after remaining."

@@ -2,7 +2,7 @@
 # like `git checkout -`, but ignore master because it's never what I want
 # I use this as `alias c-=git-last-branch`
 
-skip = [`git rev-parse --abbrev-ref HEAD`.strip, "master"]
+skip = [`git rev-parse --abbrev-ref HEAD`.strip, `git default-branch`.strip, "master", "main", "develop"]
 
 (1..100).each do |n|
   b = `git rev-parse --abbrev-ref @{-#{n}}`.strip

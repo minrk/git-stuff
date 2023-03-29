@@ -1,5 +1,5 @@
 #!/usr/bin/env ruby
-# 
+#
 # git fuzzy-checkout
 
 # Same as `git checkout branch`, but with fuzzy matching if checkout fails.
@@ -13,52 +13,73 @@
 require "set"
 
 def git_branches
-    # construct array of git branches
-    branches = `git branch`.split
-    remote_branches = `git branch -r`.split
-    remotes = Set.new `git remote`.split
-    branches.delete "*"
-    extras = []
-    # add remote branches minus the 'remote/' prefix
-    remote_branches.each do |branch|
-      remote, branch = branch.split("/", 2)
-      if remotes.include? remote
-        extras.push branch
-      end
+  # construct array of git branches
+  branches = `git branch`.split
+  remote_branches = `git branch -r`.split
+  remotes = Set.new `git remote`.split
+  branches.delete "*"
+  extras = []
+  # add remote branches minus the 'remote/' prefix
+  remote_branches.each do |branch|
+    remote, branch = branch.split("/", 2)
+    if remotes.include? remote
+      extras.push branch
     end
-    branches + extras
+  end
+  branches + extras
+end
+
+def levenshtein_distance(s, t)
+  # https://stackoverflow.com/a/46410685/938949
+  v0 = (0..t.length).to_a
+  v1 = []
+
+  s.chars.each_with_index do |s_ch, i|
+    v1[0] = i + 1
+
+    t.chars.each_with_index do |t_ch, j|
+      cost = s_ch == t_ch ? 0 : 1
+      v1[j + 1] = [v1[j] + 1, v0[j + 1] + 1, v0[j] + cost].min
+    end
+    v0 = v1.dup
+  end
+
+  1.0 - (1.0 * v0[t.length] / [s.length, t.length].max)
 end
 
 def fuzzy_checkout(branch)
-    # wrapper for git-checkout that does fuzzy-matching
-    #
-    # Helps with typos, etc. by automatically checking out the closest match
-    # if the initial checkout call fails.
-    
-    # if checkout succeeds, nothing to do
-    success = system "git checkout #{branch}"
-    if success
-      return success
+  # wrapper for git-checkout that does fuzzy-matching
+  #
+  # Helps with typos, etc. by automatically checking out the closest match
+  # if the initial checkout call fails.
+
+  # if checkout succeeds, nothing to do
+  success = system "git checkout #{branch}"
+  if success
+    return success
+  end
+
+  branches = git_branches.sort { |a,b|
+    levenshtein_distance(branch, a) <=> levenshtein_distance(branch, b)
+  }
+  best = branches.last
+  similarity = levenshtein_distance(branch, best)
+  if similarity > 0.5
+    puts "Best match for #{branch}: #{best} (#{(100 * similarity).round(1)}%)"
+    success = system "git checkout #{best}"
+  else
+    puts "Best (not great) match for #{branch}: #{best} (#{(100 * similarity).round(0)}%)"
+    if STDIN.isatty
+      printf("%s", "Checkout #{best}? [Y/n] ")
+      ans = STDIN.gets.chomp
+      if ans.empty? or ans.downcase[0] == "y"
+        success = system "git checkout #{best}"
+      else
+        puts "Not checking out"
+      end
     end
-    
-    begin
-      require "rubygems"
-      require "amatch"
-    rescue LoadError
-      puts "error: git fuzzy-checkout requires gem: amatch"
-      return 1
-    end
-    
-    branches = git_branches.sort { |a,b|
-      branch.levenshtein_similar(a) <=> branch.levenshtein_similar(b)
-    }
-    best = branches.last
-    similarity = branch.levenshtein_similar(best)
-    if similarity > 0.5
-      puts "Best match for #{branch}: #{best} (#{(100 * similarity).round(1)}%)"
-      success = system "git checkout #{best}"
-    end
-    success
+  end
+  success
 end
 
 exit fuzzy_checkout(ARGV[0])
